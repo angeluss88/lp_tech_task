@@ -128,6 +128,7 @@ class PortfolioHistoryController extends AbstractController
             );
         }
 
+        // @todo Add pagination/limit support when snapshot volume grows to keep this endpoint bounded.
         $history = $repository->findHistory($from, $to);
 
         $payload = array_map(

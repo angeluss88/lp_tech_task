@@ -78,11 +78,16 @@ Example response:
 ## Architectural decisions
 
 - `BinancePriceService` encapsulates external HTTP calls and error handling for Binance avgPrice endpoint.
-- `PortfolioValuationService` contains business logic for valuation formula and fixed portfolio holdings.
+- `PortfolioValuationService` contains business logic for valuation formula and configured portfolio holdings.
 - `PortfolioSnapshotCommand` is the scheduled entrypoint (`app:portfolio:snapshot`) that calculates and persists one snapshot per hour (UTC hour granularity).
 - `PortfolioValuationSnapshot` Doctrine entity stores historical values in `portfolio_valuation_snapshots`.
 - `PortfolioHistoryController` exposes chart-friendly API response and parameter validation.
 - Monolog is used for operational visibility in price fetching, valuation, and snapshot persistence flow.
+
+## Operational TODOs
+
+- @todo Add health/readiness endpoint for deployment probes and upstream dependency visibility.
+- @todo Add structured metrics (e.g. snapshot success/failure counters, Binance latency) for observability dashboards.
 
 ## Testing
 
