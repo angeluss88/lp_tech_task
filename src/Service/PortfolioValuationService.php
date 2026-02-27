@@ -18,24 +18,28 @@ class PortfolioValuationService
 
     public function calculateTotalUsdt(): float
     {
-        $btcAmount = (float) ($this->portfolioHoldings['BTC'] ?? 0.0);
-        $ethAmount = (float) ($this->portfolioHoldings['ETH'] ?? 0.0);
-        $solAmount = (float) ($this->portfolioHoldings['SOL'] ?? 0.0);
-        $usdtAmount = (float) ($this->portfolioHoldings['USDT'] ?? 0.0);
+        $total = 0.0;
+        $prices = [];
 
-        $btcPrice = $this->binancePriceService->getAveragePriceUsdt('BTC');
-        $ethPrice = $this->binancePriceService->getAveragePriceUsdt('ETH');
-        $solPrice = $this->binancePriceService->getAveragePriceUsdt('SOL');
+        foreach ($this->portfolioHoldings as $asset => $amountRaw) {
+            $asset = strtoupper((string) $asset);
+            $amount = (float) $amountRaw;
 
-        $total = ($btcAmount * $btcPrice) + ($ethAmount * $ethPrice) + ($solAmount * $solPrice) + $usdtAmount;
+            // USDT is already the quote currency, so no external price lookup is needed.
+            if ($asset === 'USDT') {
+                $total += $amount;
+
+                continue;
+            }
+
+            $price = $this->binancePriceService->getAveragePriceUsdt($asset);
+            $prices[$asset.'USDT'] = $price;
+            $total += $amount * $price;
+        }
 
         $this->logger->info('Portfolio valuation calculated.', [
             'holdings' => $this->portfolioHoldings,
-            'prices' => [
-                'BTCUSDT' => $btcPrice,
-                'ETHUSDT' => $ethPrice,
-                'SOLUSDT' => $solPrice,
-            ],
+            'prices' => $prices,
             'total_usdt' => $total,
         ]);
 
